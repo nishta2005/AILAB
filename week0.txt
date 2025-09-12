@@ -1,0 +1,16 @@
+ p=0
+ result = 0 
+num = int(input("enter a number"))
+ n1 = num
+ n2 = num  
+while (n1!=0):
+      n1 = n1//10 
+      p = p+1
+while (n2 > 0):
+      d = n2%10
+      result= result + (d ** p )
+      n2= n2//10
+if(result==num):
+   print("Armstrong") 
+else :
+   print("Not Armstrong")
