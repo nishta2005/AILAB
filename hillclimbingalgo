@@ -1,9 +1,67 @@
-Algorithm Hill_Climbing(problem)
-    current ← Generate_Initial_State(problem)
-    loop
-        neighbor ← Best_Successor(current)
-        if Value(neighbor) ≤ Value(current) then
-            return current
-        current ← neighbor
-    end loop
-End Algorithm
+import random
+
+# Function to calculate heuristic (number of attacking pairs)
+def calculate_heuristic(state):
+    h = 0
+    n = len(state)
+    for i in range(n):
+        for j in range(i + 1, n):
+            # Same row or same diagonal
+            if state[i] == state[j] or abs(state[i] - state[j]) == abs(i - j):
+                h += 1
+    return h
+
+# Generate all neighbors (move one queen in each column)
+def generate_neighbors(state):
+    neighbors = []
+    n = len(state)
+    for col in range(n):
+        for row in range(n):
+            if row != state[col]:
+                new_state = list(state)
+                new_state[col] = row
+                neighbors.append(new_state)
+    return neighbors
+
+# Hill Climbing Algorithm
+def hill_climbing_4queens(n=4):
+    # Initial random state
+    current = [random.randint(0, n-1) for _ in range(n)]
+    current_h = calculate_heuristic(current)
+
+    print("Initial State:", current, "Heuristic =", current_h)
+    print()
+
+    while True:
+        neighbors = generate_neighbors(current)
+        best_neighbor = None
+        best_h = current_h
+
+        for neighbor in neighbors:
+            h = calculate_heuristic(neighbor)
+            if h < best_h:
+                best_h = h
+                best_neighbor = neighbor
+
+        # Stop if no improvement
+        if best_neighbor is None:
+            break
+
+        current = best_neighbor
+        current_h = best_h
+
+        print("Current State:", current, "Heuristic =", current_h)
+
+        # Goal reached
+        if current_h == 0:
+            print("\n✅ Solution found!")
+            for i in range(n):
+                row = ["Q" if current[i] == j else "." for j in range(n)]
+                print(" ".join(row))
+            return
+
+    print("\n❌ Stopped at local minimum.")
+    print("Final State:", current, "Heuristic =", current_h)
+
+# Run for 4 queens
+hill_climbing_4queens(4)
