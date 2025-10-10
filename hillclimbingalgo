@@ -1,0 +1,9 @@
+Algorithm Hill_Climbing(problem)
+    current ← Generate_Initial_State(problem)
+    loop
+        neighbor ← Best_Successor(current)
+        if Value(neighbor) ≤ Value(current) then
+            return current
+        current ← neighbor
+    end loop
+End Algorithm
