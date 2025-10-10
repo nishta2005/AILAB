@@ -1,0 +1,89 @@
+import heapq
+
+# Goal state
+goal_state = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+
+# Moves: up, down, left, right
+moves = {
+    'U': -3,
+    'D': 3,
+    'L': -1,
+    'R': 1
+}
+
+# Check if move is valid
+def valid_moves(pos):
+    invalid = {
+        0: ['U', 'L'], 1: ['U'], 2: ['U', 'R'],
+        3: ['L'], 5: ['R'],
+        6: ['D', 'L'], 7: ['D'], 8: ['D', 'R']
+    }
+    return [m for m in moves if m not in invalid.get(pos, [])]
+
+# Apply move
+def apply_move(state, move):
+    lst = list(state)
+    idx = lst.index(0)
+    swap_idx = idx + moves[move]
+    lst[idx], lst[swap_idx] = lst[swap_idx], lst[idx]
+    return tuple(lst)
+
+# Print board
+def print_board(state):
+    for i in range(0, 9, 3):
+        print(state[i:i+3])
+    print()
+
+# ---------------- Heuristics ----------------
+def misplaced_tiles(state):
+    return sum(1 for i, v in enumerate(state) if v != 0 and v != goal_state[i])
+
+def manhattan_distance(state):
+    dist = 0
+    for i, v in enumerate(state):
+        if v != 0:
+            goal_idx = goal_state.index(v)
+            dist += abs(i // 3 - goal_idx // 3) + abs(i % 3 - goal_idx % 3)
+    return dist
+
+# ---------------- Solvability check ----------------
+def is_solvable(state):
+    arr = [x for x in state if x != 0]
+    inv_count = 0
+    for i in range(len(arr)):
+        for j in range(i + 1, len(arr)):
+            if arr[i] > arr[j]:
+                inv_count += 1
+    return inv_count % 2 == 0
+
+# ---------------- A* ----------------
+def astar(start, heuristic):
+    pq = [(heuristic(start), 0, start, [])]
+    visited = {start}  
+    while pq:
+        f, g, state, path = heapq.heappop(pq)
+        print_board(state)
+        if state == goal_state:
+            return path
+        for move in valid_moves(state.index(0)):
+            nxt = apply_move(state, move)
+            if nxt not in visited:
+                visited.add(nxt)  
+                h = heuristic(nxt)
+                heapq.heappush(pq, (g + 1 + h, g + 1, nxt, path + [move]))
+    return None
+
+# ---------------- Main ----------------
+if __name__ == "__main__":
+    input_string = input("Enter the initial state as space separated numbers from 1 to 8, and 0 representing the blank: ")
+    start_state = tuple(map(int, input_string.split()))
+
+    print("Start State:")
+    print_board(start_state)
+
+    if not is_solvable(start_state):
+        print("This puzzle is not solvable.")
+    else:
+        print("Solvable puzzle.")
+        print("A* Misplaced Tiles Path:", astar(start_state, misplaced_tiles))
+        print("A* Manhattan Distance Path:", astar(start_state, manhattan_distance))
